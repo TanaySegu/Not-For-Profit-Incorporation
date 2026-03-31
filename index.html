@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nonprofit Incorporation Tracker — Ikshana Z Inc</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--navy:#0f1e35;--navy-mid:#1a2f4a;--gold:#c9972b;--gold-light:#e5b84a;--gold-pale:#fdf3de;--cream:#faf8f4;--white:#ffffff;--slate:#64748b;--slate-light:#94a3b8;--border:#e2ddd4;--border-dark:#c8c0b0;--success:#16a34a;--success-bg:#f0fdf4;--warning:#d97706;--warning-bg:#fffbeb;--danger:#dc2626;--danger-bg:#fef2f2;--info:#0369a1;--info-bg:#f0f9ff;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(15,30,53,0.08),0 4px 16px rgba(15,30,53,0.06);--shadow-lg:0 8px 32px rgba(15,30,53,0.12)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);min-height:100vh;font-size:14px;line-height:1.6}
+.header{background:var(--navy);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.2)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--navy)}
+.logo-text .firm{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:white}
+.logo-text .tagline{font-size:10px;color:var(--slate-light);letter-spacing:1px;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:16px}
+.cart-btn{background:rgba(201,151,43,0.15);border:1px solid rgba(201,151,43,0.3);color:var(--gold-light);padding:8px 16px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
+.cart-btn:hover{background:rgba(201,151,43,0.25)}
+.cart-badge{background:var(--gold);color:var(--navy);font-size:10px;font-weight:600;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center}
+.client-tag{background:rgba(255,255,255,0.08);color:var(--slate-light);font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1)}
+.layout{display:flex;min-height:calc(100vh - 64px)}
+.sidebar{width:240px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);padding:24px 16px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
+.sidebar-title{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--slate-light);font-weight:500;margin-bottom:16px;padding:0 8px}
+.step-nav{list-style:none}
+.step-nav li{display:flex;align-items:flex-start;gap:10px;padding:8px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px}
+.step-nav li:hover{background:var(--cream)}
+.step-nav li.active{background:var(--gold-pale)}
+.step-nav li.active .step-label{color:var(--navy);font-weight:500}
+.step-dot{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:1px}
+.step-dot.pending{background:var(--border);color:var(--slate-light)}
+.step-dot.active{background:var(--gold);color:var(--navy)}
+.step-dot.done{background:var(--success);color:white;font-size:12px}
+.step-label{font-size:12px;color:var(--slate);line-height:1.4}
+.step-sublabel{font-size:10px;color:var(--slate-light);margin-top:1px}
+.main{flex:1;padding:32px;max-width:860px}
+.progress-bar-wrap{margin-bottom:28px}
+.progress-bar-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 100%);border-radius:3px;transition:width 0.4s ease}
+.progress-label{font-size:11px;color:var(--slate-light)}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.step-number{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:500;margin-bottom:4px}
+.card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--navy)}
+.card-subtitle{font-size:13px;color:var(--slate);margin-top:4px}
+.step-badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500}
+.step-badge.pending{background:var(--border);color:var(--slate)}
+.step-badge.active{background:var(--gold-pale);color:var(--warning);border:1px solid rgba(201,151,43,0.3)}
+.step-badge.done{background:var(--success-bg);color:var(--success)}
+.form-row{display:flex;gap:16px;margin-bottom:16px}
+.form-group{flex:1}
+.form-group.half{flex:0 0 calc(50% - 8px)}
+label{display:block;font-size:12px;font-weight:500;color:var(--navy);margin-bottom:6px}
+.required{color:var(--danger);margin-left:2px}
+input[type=text],input[type=email],select,textarea{width:100%;padding:10px 14px;border:1px solid var(--border-dark);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--navy);background:var(--white);transition:border-color 0.15s;appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,151,43,0.15)}
+textarea{resize:vertical;min-height:100px}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s}
+.btn-primary{background:var(--navy);color:white}
+.btn-primary:hover{background:var(--navy-mid)}
+.btn-gold{background:var(--gold);color:var(--navy);font-weight:600}
+.btn-gold:hover{background:var(--gold-light)}
+.btn-outline{background:transparent;color:var(--navy);border:1px solid var(--border-dark)}
+.btn-outline:hover{background:var(--cream)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-cpa{background:rgba(201,151,43,0.1);color:var(--warning);border:1px dashed rgba(201,151,43,0.5);font-size:12px;padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:background 0.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-cpa:hover{background:rgba(201,151,43,0.18)}
+.btn-cpa.in-cart{background:rgba(22,163,74,0.1);color:var(--success);border:1px solid rgba(22,163,74,0.4);cursor:default}
+.info-box{padding:12px 16px;border-radius:var(--radius);font-size:13px;display:flex;gap:10px;margin-bottom:16px}
+.info-box.info{background:var(--info-bg);color:var(--info);border:1px solid rgba(3,105,161,0.15)}
+.info-box.warning{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(217,119,6,0.2)}
+.info-box.success{background:var(--success-bg);color:var(--success);border:1px solid rgba(22,163,74,0.2)}
+.info-box.danger{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(220,38,38,0.2)}
+.info-box .icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.info-box p{line-height:1.5}
+.checklist{list-style:none}
+.checklist li{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.checklist li:last-child{border-bottom:none}
+.checklist input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--gold);cursor:pointer}
+.check-text{flex:1}
+.check-label{font-weight:500;color:var(--navy)}
+.check-note{font-size:11px;color:var(--slate);margin-top:2px}
+.check-cpa{margin-left:auto;flex-shrink:0}
+.name-check-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+.name-check-row .form-group{flex:1}
+.name-status{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;display:inline-flex;align-items:center;gap:5px;margin-top:6px}
+.name-status.available{background:var(--success-bg);color:var(--success)}
+.name-status.checking{background:var(--info-bg);color:var(--info)}
+.name-status.unavailable{background:var(--danger-bg);color:var(--danger)}
+.members-table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.members-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--slate-light);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--border);background:var(--cream)}
+.members-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+.members-table tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.badge-us{background:#dbeafe;color:#1d4ed8}
+.badge-foreign{background:#fce7f3;color:#be185d}
+.badge-ssn{background:var(--success-bg);color:var(--success)}
+.badge-itin{background:var(--warning-bg);color:var(--warning)}
+.badge-none{background:var(--danger-bg);color:var(--danger)}
+.tracker-check{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.tracker-check.yes{background:var(--success-bg);color:var(--success)}
+.tracker-check.no{background:var(--danger-bg);color:var(--danger)}
+.tracker-check.unknown{background:var(--border);color:var(--slate)}
+.verdict-banner{margin-top:20px;padding:20px 24px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:16px}
+.verdict-banner.ez{background:var(--success-bg);border:2px solid rgba(22,163,74,0.3)}
+.verdict-banner.full{background:var(--warning-bg);border:2px solid rgba(217,119,6,0.3)}
+.verdict-icon{font-size:32px}
+.verdict-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600}
+.verdict-desc{font-size:13px;color:var(--slate);margin-top:4px}
+.state-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.state-info-card{background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.state-info-label{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--slate-light);font-weight:500;margin-bottom:4px}
+.state-info-value{font-size:14px;font-weight:500;color:var(--navy)}
+.corp-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.corp-type-card{border:2px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all 0.2s;position:relative}
+.corp-type-card:hover,.corp-type-card.selected{border-color:var(--gold);background:var(--gold-pale)}
+.corp-type-card.selected::after{content:'✓';position:absolute;top:12px;right:12px;width:20px;height:20px;background:var(--gold);color:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.corp-type-title{font-weight:600;font-size:14px;color:var(--navy);margin-bottom:4px}
+.corp-type-sub{font-size:11px;color:var(--slate);line-height:1.4}
+.corp-type-tag{display:inline-block;background:var(--navy);color:white;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;margin-bottom:8px;text-transform:uppercase}
+.cpa-panel-overlay{display:none;position:fixed;inset:0;background:rgba(15,30,53,0.5);z-index:200}
+.cpa-panel-overlay.open{display:block}
+.cpa-panel{position:fixed;top:0;right:0;width:380px;height:100vh;background:var(--white);box-shadow:var(--shadow-lg);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.3s ease}
+.cpa-panel-overlay.open .cpa-panel{transform:translateX(0)}
+.cpa-panel-header{background:var(--navy);padding:20px 24px;color:white}
+.cpa-panel-header h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500}
+.cpa-panel-header p{font-size:12px;color:var(--slate-light);margin-top:4px}
+.cpa-panel-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.1);border:none;color:white;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.cpa-panel-body{flex:1;overflow-y:auto;padding:20px 24px}
+.cpa-item{background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;position:relative}
+.cpa-item-title{font-weight:500;font-size:13px;color:var(--navy)}
+.cpa-item-note{font-size:11px;color:var(--slate);margin-top:4px}
+.cpa-item-remove{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--slate-light);cursor:pointer;font-size:16px;line-height:1}
+.cpa-empty{text-align:center;padding:40px 20px;color:var(--slate-light)}
+.cpa-empty-icon{font-size:36px;margin-bottom:12px}
+.cpa-panel-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(15,30,53,0.6);z-index:300;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--white);border-radius:var(--radius-lg);width:500px;max-width:90vw;box-shadow:var(--shadow-lg);overflow:hidden}
+.modal-header{background:var(--navy);padding:20px 24px;color:white;position:relative}
+.modal-header h3{font-family:'Playfair Display',serif;font-size:18px}
+.modal-header p{font-size:12px;color:var(--slate-light);margin-top:4px}
+.modal-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.1);border:none;color:white;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.step-nav-btns{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.ein-option{display:flex;gap:10px;align-items:flex-start;padding:14px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color 0.15s;margin-bottom:10px}
+.ein-option input[type=radio]{margin-top:3px;accent-color:var(--gold)}
+.ein-option:has(input:checked){border-color:var(--gold);background:var(--gold-pale)}
+.ein-option-title{font-weight:500;font-size:13px}
+.ein-option-desc{font-size:11px;color:var(--slate);margin-top:2px}
+.section-divider{display:flex;align-items:center;gap:10px;margin:20px 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--slate-light);font-weight:500}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.step-panel{display:none}
+.step-panel.active{display:block}
+@media print{.header,.sidebar,.cpa-panel-overlay,.modal-backdrop,.step-nav-btns,.btn-cpa,.cart-btn{display:none!important}.layout{display:block}.main{max-width:100%;padding:20px}.step-panel{display:block!important;page-break-inside:avoid}.card{box-shadow:none;border:1px solid #ccc;margin-bottom:20px}}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{display:inline-block;background:var(--cream);border:1px solid var(--border);border-radius:5px;font-size:11px;padding:3px 8px;color:var(--slate)}
+.tag.highlight{background:var(--gold-pale);border-color:rgba(201,151,43,0.3);color:var(--warning)}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">IZ</div>
+    <div class="logo-text">
+      <div class="firm">Ikshana Z Inc</div>
+      <div class="tagline">Certified Public Accountants</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="client-tag">Nonprofit Incorporation Tracker</span>
+    <button class="cart-btn" onclick="toggleCPAPanel()">&#128722; CPA Services <span class="cart-badge" id="cart-count">0</span></button>
+  </div>
+</header>
+
+<div class="cpa-panel-overlay" id="cpa-overlay" onclick="handleOverlayClick(event)">
+  <div class="cpa-panel">
+    <button class="cpa-panel-close" onclick="toggleCPAPanel()">&#215;</button>
+    <div class="cpa-panel-header"><h3>&#128722; CPA Services Cart</h3><p>Items Ikshana Z Inc will handle for your client</p></div>
+    <div class="cpa-panel-body" id="cpa-cart-body"><div class="cpa-empty"><div class="cpa-empty-icon">&#128203;</div><p style="font-size:13px;font-weight:500">No services added yet</p><p style="font-size:12px;margin-top:6px">Click "Add to CPA Cart" throughout the checklist to queue services.</p></div></div>
+    <div class="cpa-panel-footer">
+      <button class="btn btn-outline btn-sm" onclick="openEmailModal()">&#128231; Email Summary to CPA</button>
+      <button class="btn btn-gold" style="width:100%" onclick="exportPDF()">&#8595; Export Full Checklist PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="email-modal">
+  <div class="modal" style="width:560px">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeEmailModal()">&#215;</button>
+      <h3>&#128203; Send Summary to CPA</h3>
+      <p>Download the summary PDF, then email it to Ikshana Z Inc</p>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Client / Org Name<span class="required">*</span></label><input type="text" id="email-client-name" placeholder="e.g. Green Future Foundation"></div>
+        <div class="form-group"><label>Client Email<span class="required">*</span></label><input type="text" id="email-client-email" placeholder="client@example.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>CPA Email (Ikshana Z Inc)</label><input type="text" id="email-cpa-email" value="office@ikshanaz.com"></div>
+        <div class="form-group"><label>Incorporation State</label><input type="text" id="email-state-display" placeholder="Auto-filled from Step 1" readonly style="background:var(--cream)"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:16px"><label>Additional Notes</label><textarea id="email-notes" placeholder="Any special instructions..." style="min-height:60px"></textarea></div>
+      <div style="background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
+        <div style="padding:12px 16px;background:var(--navy);color:white;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px">Recommended Steps</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr">
+          <div style="padding:20px;border-right:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;margin-bottom:6px">Step 1</div>
+            <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px">&#8595; Download PDF Summary</div>
+            <div style="font-size:12px;color:var(--slate);margin-bottom:14px;line-height:1.5">Generate a formatted PDF with all CPA services and checklist status.</div>
+            <button class="btn btn-primary" style="width:100%" onclick="downloadSummaryPDF()">Download PDF</button>
+            <div id="pdf-download-status" style="font-size:11px;color:var(--success);margin-top:8px;min-height:16px"></div>
+          </div>
+          <div style="padding:20px">
+            <div style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;margin-bottom:6px">Step 2</div>
+            <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px">&#128231; Open Email to CPA</div>
+            <div style="font-size:12px;color:var(--slate);margin-bottom:14px;line-height:1.5">Opens your email client pre-filled with CPA address and summary.</div>
+            <button class="btn btn-gold" style="width:100%" onclick="openEmailClient()">Open Email Client</button>
+            <div style="font-size:11px;color:var(--slate);margin-top:8px">Attach the downloaded PDF before sending</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn btn-outline" onclick="closeEmailModal()">Close</button>
+      <div style="font-size:12px;color:var(--slate)">&#128206; Download PDF first, then attach to email</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">Incorporation Steps</div>
+    <ul class="step-nav" id="step-nav">
+      <li class="active" onclick="goToStep(0)"><div class="step-dot active" id="dot-0">1</div><div><div class="step-label">State Selection</div><div class="step-sublabel">Choose incorporation state</div></div></li>
+      <li onclick="goToStep(1)"><div class="step-dot pending" id="dot-1">2</div><div><div class="step-label">Name Availability</div><div class="step-sublabel">Check &amp; reserve name</div></div></li>
+      <li onclick="goToStep(2)"><div class="step-dot pending" id="dot-2">3</div><div><div class="step-label">Corporation Type</div><div class="step-sublabel">501(c)(3), (4), (6)...</div></div></li>
+      <li onclick="goToStep(3)"><div class="step-dot pending" id="dot-3">4</div><div><div class="step-label">State Requirements</div><div class="step-sublabel">Filing rules &amp; agents</div></div></li>
+      <li onclick="goToStep(4)"><div class="step-dot pending" id="dot-4">5</div><div><div class="step-label">Members &amp; Directors</div><div class="step-sublabel">US &amp; foreign members</div></div></li>
+      <li onclick="goToStep(5)"><div class="step-dot pending" id="dot-5">6</div><div><div class="step-label">Mission Statement</div><div class="step-sublabel">Purpose &amp; activities</div></div></li>
+      <li onclick="goToStep(6)"><div class="step-dot pending" id="dot-6">7</div><div><div class="step-label">EIN Application</div><div class="step-sublabel">Tax ID &amp; responsible party</div></div></li>
+      <li onclick="goToStep(7)"><div class="step-dot pending" id="dot-7">8</div><div><div class="step-label">Dept. of AG Filing</div><div class="step-sublabel">Articles of Incorporation</div></div></li>
+      <li onclick="goToStep(8)"><div class="step-dot pending" id="dot-8">9</div><div><div class="step-label">1023 / 1023-EZ</div><div class="step-sublabel">501(c)(3) eligibility</div></div></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:11%"></div></div>
+      <div class="progress-label" id="progress-label">Step 1 of 9 — State Selection</div>
+    </div>
+
+    <div class="step-panel active" id="step-0">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 01</div><div class="card-title">Choose Incorporation State</div><div class="card-subtitle">Select the state where your nonprofit will be incorporated.</div></div><span class="step-badge active">In Progress</span></div>
+        <div class="form-row">
+          <div class="form-group"><label>Incorporation State <span class="required">*</span></label>
+            <select id="state-select" onchange="onStateChange()">
+              <option value="">— Select a State —</option>
+              <option value="CA">California (CA)</option><option value="DE">Delaware (DE)</option>
+              <option value="FL">Florida (FL)</option><option value="IL">Illinois (IL)</option>
+              <option value="NY">New York (NY)</option><option value="TX">Texas (TX)</option>
+              <option value="WA">Washington (WA)</option><option value="WY">Wyoming (WY)</option>
+              <option value="other">Other State</option>
+            </select>
+          </div>
+          <div class="form-group half"><label>Where does the org operate?</label>
+            <select id="operate-state"><option value="">Same as incorporation state</option><option value="multi">Multiple States</option><option value="national">Nationwide</option></select>
+          </div>
+        </div>
+        <div id="state-info-panel" style="display:none">
+          <div class="section-divider">State Overview</div>
+          <div id="state-info-content"></div>
+          <div class="state-info-grid" id="state-info-grid"></div>
+        </div>
+        <div class="step-nav-btns"><div></div><button class="btn btn-gold" onclick="nextStep()">Continue to Name Check &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-1">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 02</div><div class="card-title">Name Availability Check</div><div class="card-subtitle">Check if your desired nonprofit name is available in your state.</div></div><span class="step-badge pending" id="badge-1">Pending</span></div>
+        <div class="info-box info"><span class="icon">&#8505;&#65039;</span><p>Nonprofit names must include a designator like "Inc.", "Incorporated", or "Corporation" and must be distinguishable from existing entities.</p></div>
+        <div class="section-divider">Name Options</div>
+        <div class="name-check-row"><div class="form-group"><label>Primary Name <span class="required">*</span></label><input type="text" id="name-1" placeholder="e.g. Green Future Foundation, Inc."><div id="name-1-status"></div></div><button class="btn btn-outline btn-sm" onclick="checkName(1)">Check</button><button class="btn-cpa" id="cpa-name-search" onclick="addToCartAndMark('Name Search &amp; Reservation','CPA will conduct official name search and file name reservation with Secretary of State.','cpa-name-search')">+ CPA Help</button></div>
+        <div class="name-check-row"><div class="form-group"><label>Alternate Name #1</label><input type="text" id="name-2" placeholder="Backup option #1"><div id="name-2-status"></div></div><button class="btn btn-outline btn-sm" onclick="checkName(2)">Check</button></div>
+        <div class="name-check-row"><div class="form-group"><label>Alternate Name #2</label><input type="text" id="name-3" placeholder="Backup option #2"><div id="name-3-status"></div></div><button class="btn btn-outline btn-sm" onclick="checkName(3)">Check</button></div>
+        <div class="info-box warning" style="margin-top:12px"><span class="icon">&#9888;&#65039;</span><p>The check above is a <strong>simulation</strong>. For official verification, visit your state's Secretary of State portal. <span id="sos-link"></span></p></div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to Corp Type &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-2">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 03</div><div class="card-title">Type of Corporation</div><div class="card-subtitle">Select the IRS tax-exempt category that best fits your organization.</div></div><span class="step-badge pending" id="badge-2">Pending</span></div>
+        <div class="corp-type-grid">
+          <div class="corp-type-card" onclick="selectCorpType(this,'501c3')"><div class="corp-type-tag">Most Common</div><div class="corp-type-title">501(c)(3) — Charitable Org</div><div class="corp-type-sub">Public charities, foundations, educational, religious, or scientific orgs. Donors can deduct contributions.</div><div class="tag-row"><span class="tag">Religious</span><span class="tag">Educational</span><span class="tag">Scientific</span><span class="tag">Charitable</span></div></div>
+          <div class="corp-type-card" onclick="selectCorpType(this,'501c4')"><div class="corp-type-tag">Social</div><div class="corp-type-title">501(c)(4) — Social Welfare</div><div class="corp-type-sub">Civic leagues and social welfare orgs. Can engage in political activities. Donations NOT tax-deductible.</div><div class="tag-row"><span class="tag">Civic Leagues</span><span class="tag">Advocacy</span><span class="tag">Political OK</span></div></div>
+          <div class="corp-type-card" onclick="selectCorpType(this,'501c6')"><div class="corp-type-tag">Business</div><div class="corp-type-title">501(c)(6) — Trade Association</div><div class="corp-type-sub">Chambers of commerce, trade associations, and professional leagues. Membership-based.</div><div class="tag-row"><span class="tag">Chambers</span><span class="tag">Trade Groups</span><span class="tag">Professional</span></div></div>
+          <div class="corp-type-card" onclick="selectCorpType(this,'unsure')"><div class="corp-type-tag">Need Guidance</div><div class="corp-type-title">I'm Not Sure</div><div class="corp-type-sub">Let Ikshana Z Inc evaluate your mission and activities to recommend the best classification.</div><div class="tag-row"><span class="tag highlight">CPA Consultation</span></div></div>
+        </div>
+        <div id="corp-type-cpa-note" style="display:none;margin-top:16px"><div class="info-box warning"><span class="icon">&#128188;</span><p>Added to CPA Cart: Ikshana Z Inc will review your mission, activities, and financials to recommend the optimal tax-exempt category.</p></div></div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to Requirements &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-3">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 04</div><div class="card-title">State-Specific Requirements</div><div class="card-subtitle">Review and confirm all statutory requirements for nonprofit incorporation in your selected state.</div></div><span class="step-badge pending" id="badge-3">Pending</span></div>
+        <div id="state-req-content"><div class="info-box info"><span class="icon">&#8505;&#65039;</span><p>Please complete Step 1 (State Selection) first to see state-specific requirements.</p></div></div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to Members &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-4">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 05</div><div class="card-title">Members &amp; Directors</div><div class="card-subtitle">Add all initial directors and members. Flag US residence status and tax ID availability.</div></div><span class="step-badge pending" id="badge-4">Pending</span></div>
+        <table class="members-table"><thead><tr><th>Name</th><th>Role</th><th>US Resident</th><th>Tax ID</th><th>Action</th></tr></thead><tbody id="members-tbody"><tr><td colspan="5" style="text-align:center;color:var(--slate-light);padding:20px;font-size:13px">No members added yet. Use the form below.</td></tr></tbody></table>
+        <div id="member-flags" style="margin-bottom:14px"></div>
+        <div class="section-divider">Add Member / Director</div>
+        <div class="form-row">
+          <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="m-name" placeholder="Full legal name"></div>
+          <div class="form-group half"><label>Role <span class="required">*</span></label><select id="m-role"><option>Director</option><option>President</option><option>Secretary</option><option>Treasurer</option><option>Member</option><option>Registered Agent</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half"><label>US Resident?</label><select id="m-us"><option value="yes">Yes — US Resident</option><option value="no">No — Foreign National</option></select></div>
+          <div class="form-group half"><label>Tax ID Status</label><select id="m-taxid"><option value="ssn">Has SSN</option><option value="itin">Has ITIN</option><option value="none">Neither (No US Tax ID)</option><option value="pending">Pending / Applying</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addMember()">+ Add Member</button>
+        <div class="section-divider">EIN Responsible Party</div>
+        <div class="form-group" style="max-width:300px"><label>Select Responsible Party for EIN</label><select id="ein-responsible"><option value="">— Select from members above —</option></select></div>
+        <div id="responsible-party-note" style="margin-top:10px"></div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to Mission &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-5">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 06</div><div class="card-title">Mission Statement</div><div class="card-subtitle">A clear mission statement is required for Articles of Incorporation and IRS Form 1023.</div></div><span class="step-badge pending" id="badge-5">Pending</span></div>
+        <div class="info-box info"><span class="icon">&#128203;</span><p>For 501(c)(3), the IRS requires the statement of purpose to specifically limit activities to those described in IRC 501(c)(3). Vague statements will be rejected.</p></div>
+        <div class="form-group" style="margin-bottom:16px"><label>Mission Statement <span class="required">*</span></label><textarea id="mission-text" placeholder="e.g. The organization is organized exclusively for charitable and educational purposes in accordance with Section 501(c)(3) of the Internal Revenue Code..." rows="6" oninput="checkMission()"></textarea></div>
+        <div id="mission-feedback" style="margin-bottom:16px"></div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn-cpa" id="cpa-mission-draft" onclick="addToCartAndMark('Mission Statement Drafting','CPA/Attorney will draft a compliant mission statement per state AG and IRS Section 501(c)(3) requirements.','cpa-mission-draft')">&#128221; I don't know — CPA Draft for Me</button><span style="font-size:12px;color:var(--slate)">Ikshana Z Inc will draft a compliant statement</span></div>
+        <div class="section-divider">State-Specific Mission Notes</div>
+        <div id="mission-state-notes"><div class="info-box info"><span class="icon">&#8505;&#65039;</span><p>Complete Step 1 to see state-specific mission statement requirements.</p></div></div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to EIN &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-6">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 07</div><div class="card-title">EIN Application</div><div class="card-subtitle">EIN is required before filing Form 1023. The responsible party must have a valid SSN or ITIN.</div></div><span class="step-badge pending" id="badge-6">Pending</span></div>
+        <div class="section-divider">Responsible Party Tax ID</div>
+        <div id="ein-party-summary"><div class="info-box info"><span class="icon">&#8505;&#65039;</span><p>Please add members in Step 5 and select a responsible party to see EIN eligibility here.</p></div></div>
+        <div class="section-divider">How Will EIN Be Obtained?</div>
+        <div class="ein-option"><input type="radio" name="ein-method" value="online" id="ein-online" checked><label for="ein-online" style="cursor:pointer;margin-bottom:0"><div class="ein-option-title">&#127760; Online via IRS (SS-4) — Instant</div><div class="ein-option-desc">Available if responsible party has a valid SSN or ITIN. Takes ~15 minutes.</div></label></div>
+        <div class="ein-option"><input type="radio" name="ein-method" value="fax"><label style="cursor:pointer;margin-bottom:0"><div class="ein-option-title">&#128224; Fax (SS-4) — 4 Business Days</div><div class="ein-option-desc">Fax completed Form SS-4 to IRS.</div></label></div>
+        <div class="ein-option"><input type="radio" name="ein-method" value="mail"><label style="cursor:pointer;margin-bottom:0"><div class="ein-option-title">&#128238; Mail (SS-4) — 4-5 Weeks</div><div class="ein-option-desc">Mail completed Form SS-4. Use only if no US tax ID available.</div></label></div>
+        <div class="ein-option"><input type="radio" name="ein-method" value="cpa" id="ein-method-cpa" onchange="onEINMethodChange()"><label for="ein-method-cpa" style="cursor:pointer;margin-bottom:0"><div class="ein-option-title">&#128188; CPA Assisted — Ikshana Z Inc Handles</div><div class="ein-option-desc">Recommended for foreign-member-majority organizations.</div></label></div>
+        <div class="section-divider">EIN Checklist</div>
+        <ul class="checklist">
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Organization articles drafted or in progress</div><div class="check-note">EIN can be applied for before or after articles are filed</div></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Responsible party identified with valid SSN or ITIN</div><div class="check-note">Individual who controls, manages, or directs the entity</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-itin-ein" onclick="addToCartAndMark('ITIN Application Assistance','CPA will assist responsible party in obtaining an ITIN via Form W-7.','cpa-itin-ein')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Form SS-4 completed (or using IRS online portal)</div></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">EIN received and documented</div><div class="check-note">Store the EIN confirmation letter (CP 575) securely</div></div></li>
+        </ul>
+        <div class="form-group" style="max-width:280px;margin-top:16px"><label>EIN (Once Received)</label><input type="text" id="ein-value" placeholder="XX-XXXXXXX" style="font-family:'DM Mono',monospace"></div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to AG Filing &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-7">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 08</div><div class="card-title">Secretary of State / AG Office Filing</div><div class="card-subtitle">File Articles of Incorporation with the state. This is the legal creation of the entity.</div></div><span class="step-badge pending" id="badge-7">Pending</span></div>
+        <div id="ag-state-header"><div class="info-box info"><span class="icon">&#127963;&#65039;</span><p>Complete Step 1 to see state-specific filing portal and processing timeline.</p></div></div>
+        <div class="section-divider">Articles of Incorporation Checklist</div>
+        <ul class="checklist">
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Corporate name (with required designator)</div><div class="check-note">As verified in Step 2. Must match exactly.</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-ag-name" onclick="addToCartAndMark('Name Search &amp; Reservation','CPA will conduct official name search and file name reservation.','cpa-ag-name')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Registered agent name and address</div><div class="check-note">Must be a physical address (not PO Box) in state of incorporation</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-reg-agent" onclick="addToCartAndMark('Registered Agent Service','Ikshana Z Inc will serve as or arrange a registered agent.','cpa-reg-agent')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Names and addresses of initial directors</div><div class="check-note">Minimum director count varies by state (usually 1-3)</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-director-review" onclick="addToCartAndMark('Director &amp; Officer Compliance Review','CPA will confirm minimum director requirements are met.','cpa-director-review')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Statement of purpose / mission (IRS-compliant)</div><div class="check-note">Must contain dissolution clause for 501(c)(3)</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-ag-mission" onclick="addToCartAndMark('Mission Statement Drafting','CPA will draft a compliant mission statement.','cpa-ag-mission')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Dissolution clause (assets to another 501(c)(3) upon dissolution)</div><div class="check-note">Required by IRS for tax-exempt status</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-articles" onclick="addToCartAndMark('Articles of Incorporation Drafting','CPA will draft complete, IRS-compliant Articles of Incorporation.','cpa-articles')">+ CPA Draft</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Filing submitted to Secretary of State</div><div class="check-note" id="ag-processing-note">Processing time varies by state</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-sos-filing" onclick="addToCartAndMark('SOS Filing Coordination','Ikshana Z Inc will prepare, submit and track the Articles of Incorporation filing.','cpa-sos-filing')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Certificate of Incorporation received from state</div><div class="check-note">Processing time: 1-14 business days depending on state</div></div></li>
+        </ul>
+        <div id="ny-publication-note" style="display:none">
+          <div class="section-divider">New York Publication Requirement</div>
+          <div class="info-box warning"><span class="icon">&#128240;</span><p><strong>New York requires 6-week publication</strong> in two designated newspapers within 120 days of formation. Ikshana Z Inc can coordinate this requirement.</p></div>
+          <ul class="checklist">
+            <li><input type="checkbox"><div class="check-text"><div class="check-label">Identify designated newspapers in home county</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-ny-pub" onclick="addToCartAndMark('NY Publication Requirement','CPA will coordinate mandatory NY publication in two designated newspapers.','cpa-ny-pub')">+ CPA</button></div></li>
+            <li><input type="checkbox"><div class="check-text"><div class="check-label">Run publication notice for 6 consecutive weeks</div></div></li>
+            <li><input type="checkbox"><div class="check-text"><div class="check-label">Obtain Affidavit of Publication from both newspapers</div></div></li>
+            <li><input type="checkbox"><div class="check-text"><div class="check-label">File Certificate of Publication with NY Dept. of State</div></div></li>
+          </ul>
+        </div>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="nextStep()">Continue to 501(c)(3) Filing &#8594;</button></div>
+      </div>
+    </div>
+
+    <div class="step-panel" id="step-8">
+      <div class="card">
+        <div class="card-header"><div><div class="step-number">Step 09</div><div class="card-title">501(c)(3) Filing: 1023 or 1023-EZ?</div><div class="card-subtitle">Answer each criterion to determine whether your organization qualifies for Form 1023-EZ or must file the full Form 1023.</div></div><span class="step-badge pending" id="badge-8">Pending</span></div>
+        <div class="info-box info"><span class="icon">&#128221;</span><p>Form 1023-EZ is a shorter, online form for smaller organizations. Full Form 1023 is required for larger or more complex organizations.</p></div>
+        <div class="section-divider">1023-EZ Eligibility Criteria</div>
+        <div style="background:var(--cream);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--navy)"><th style="text-align:left;padding:10px 16px;font-size:11px;color:white;font-weight:500;text-transform:uppercase">Criterion</th><th style="padding:10px 16px;font-size:11px;color:white;font-weight:500;text-transform:uppercase;text-align:center;width:120px">Your Answer</th><th style="padding:10px 16px;font-size:11px;color:white;font-weight:500;text-transform:uppercase;text-align:center;width:100px">EZ OK?</th></tr></thead><tbody id="tracker-tbody"></tbody></table></div>
+        <div id="verdict-box" style="margin-top:20px"></div>
+        <div class="section-divider">Filing Checklist</div>
+        <ul class="checklist">
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">EIN obtained (from Step 7)</div></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Articles of Incorporation filed and approved (Step 8)</div></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Bylaws drafted and adopted</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-bylaws" onclick="addToCartAndMark('Nonprofit Bylaws Drafting','CPA/Attorney will draft compliant nonprofit bylaws including required IRS provisions.','cpa-bylaws')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">Form 1023 or 1023-EZ completed (per verdict above)</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-1023" onclick="addToCartAndMark('Form 1023 / 1023-EZ Preparation &amp; Filing','Ikshana Z Inc will prepare and file the appropriate IRS exemption application.','cpa-1023')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">IRS user fee paid</div><div class="check-note">Confirm current fee amount directly with IRS at pay.gov before filing</div></div><div class="check-cpa"><button class="btn-cpa" id="cpa-irs-fee" onclick="addToCartAndMark('IRS User Fee &amp; Filing Submission','Ikshana Z Inc will coordinate IRS fee payment and form submission.','cpa-irs-fee')">+ CPA</button></div></li>
+          <li><input type="checkbox"><div class="check-text"><div class="check-label">IRS acknowledgment / determination letter received</div><div class="check-note">Processing: 2-4 weeks (1023-EZ) / 3-12 months (Form 1023)</div></div></li>
+        </ul>
+        <div class="step-nav-btns"><button class="btn btn-outline" onclick="prevStep()">&#8592; Back</button><button class="btn btn-gold" onclick="openEmailModal()">&#128231; Send to Ikshana Z Inc &#8594;</button></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+var currentStep=0,cartItems=[],members=[],selectedState='',selectedCorpType='';
+var SD={CA:{name:'California',minDirectors:1,processingTime:'1-2 weeks',annualReport:'SI-100 (every 2 years)',registeredAgent:'Required',sosUrl:'https://bizfileonline.sos.ca.gov/',notes:'California has extensive disclosure requirements and state AG registration for solicitation.',requirements:['File Articles of Incorporation (Form ARTS-NP)','Register with CA AG Registry of Charitable Trusts (CT-1)','File SI-100 Statement of Information within 90 days','Designate registered agent with CA address'],missionNote:'California requires the Articles to include specific language limiting activities and requiring charitable asset distribution upon dissolution.',filingPortal:'bizfileonline.sos.ca.gov'},DE:{name:'Delaware',minDirectors:1,processingTime:'1-3 business days',annualReport:'Annual Franchise Tax Report',registeredAgent:'Required (DE address)',sosUrl:'https://icis.corp.delaware.gov/',notes:'Delaware is popular for its flexible corporate laws and fast processing.',requirements:['File Certificate of Incorporation with DE Division of Corporations','Designate registered agent with DE address','Pay annual franchise tax','File annual report by March 1'],missionNote:'Delaware certificate of incorporation must state the specific charitable purpose. IRS-required language must be added manually.',filingPortal:'icis.corp.delaware.gov'},FL:{name:'Florida',minDirectors:3,processingTime:'3-5 business days',annualReport:'Annual Report (due May 1)',registeredAgent:'Required (FL address)',sosUrl:'https://dos.myflorida.com/sunbiz/',notes:'Florida requires minimum 3 directors for nonprofits.',requirements:['File Articles of Incorporation with FL Division of Corporations','Appoint minimum 3 directors','Designate FL registered agent','File annual report by May 1'],missionNote:'Florida requires the purpose clause to specifically state the nonprofit nature and IRC 501(c)(3) limitation language.',filingPortal:'dos.myflorida.com/sunbiz'},NY:{name:'New York',minDirectors:3,processingTime:'7-14 business days',annualReport:'Biennial Report',registeredAgent:'Registered Agent or address required',sosUrl:'https://www.dos.ny.gov/corps/',notes:'NEW YORK has a unique mandatory publication requirement: publish for 6 consecutive weeks in two designated newspapers within 120 days.',requirements:['File Certificate of Incorporation with NY Dept. of State','MANDATORY: Publish for 6 weeks in 2 designated newspapers within 120 days','File Certificate of Publication after publishing','Register with NY AG Charities Bureau within 6 months'],missionNote:'New York Type B corporations (charitable) require specific purpose language. The AG Charities Bureau will scrutinize vague mission statements.',filingPortal:'dos.ny.gov/corps'},TX:{name:'Texas',minDirectors:3,processingTime:'3-5 business days',annualReport:'No annual report required',registeredAgent:'Required (TX address)',sosUrl:'https://www.sos.texas.gov/corps/',notes:'Texas is very affordable for nonprofit incorporation with no annual report requirement.',requirements:['File Certificate of Formation - Nonprofit Corporation (Form 202)','Designate TX registered agent','Register with TX AG if soliciting charitable contributions','Minimum 3 directors required'],missionNote:'Texas certificate of formation must include specific language for tax-exempt status.',filingPortal:'sos.texas.gov/corps'},WA:{name:'Washington',minDirectors:1,processingTime:'2-5 business days',annualReport:'Annual Report',registeredAgent:'Required (WA address)',sosUrl:'https://www.sos.wa.gov/corps/',notes:'Washington has straightforward nonprofit requirements. Charitable solicitation registration required.',requirements:['File Articles of Incorporation with WA Secretary of State','Designate WA registered agent','Register with WA Charities Program for solicitation','File annual report'],missionNote:'Washington requires purpose clause language consistent with IRC 501(c)(3) and the state Nonprofit Corporation Act.',filingPortal:'sos.wa.gov/corps'},WY:{name:'Wyoming',minDirectors:1,processingTime:'1-3 business days',annualReport:'Annual Report',registeredAgent:'Required (WY address)',sosUrl:'https://wyobiz.wyo.gov/',notes:'Wyoming is one of the most affordable and least regulated states.',requirements:['File Articles of Incorporation with WY Secretary of State','Designate WY registered agent','File annual report by the 1st day of anniversary month','Minimum 1 director'],missionNote:'Wyoming has flexible purpose clause requirements. IRS-required language for 501(c)(3) must still be included.',filingPortal:'wyobiz.wyo.gov'},IL:{name:'Illinois',minDirectors:3,processingTime:'5-10 business days',annualReport:'Annual Report',registeredAgent:'Required (IL address)',sosUrl:'https://www.ilsos.gov/corporatellc/',notes:'Illinois requires minimum 3 directors and charitable solicitation registration with the AG office.',requirements:['File Articles of Incorporation with IL Secretary of State','Appoint minimum 3 directors','Register with IL AG Charitable Trust Bureau','File annual report'],missionNote:'Illinois requires specific language in the articles limiting organizational purposes to those qualifying under IRC 501(c)(3).',filingPortal:'ilsos.gov/corporatellc'},other:{name:'Other State',minDirectors:'Varies (1-3)',processingTime:'Varies (1-14 days)',annualReport:'Varies by state',registeredAgent:'Required in most states',sosUrl:'https://www.usa.gov/state-business',notes:'Requirements vary significantly by state. Consult with Ikshana Z Inc for state-specific guidance.',requirements:['File Articles of Incorporation with Secretary of State','Designate registered agent','Review charitable solicitation registration requirements','Check annual report requirements'],missionNote:'Consult your state Secretary of State and Attorney General offices for specific requirements.',filingPortal:'usa.gov/state-business'}};
+var TC=[{id:'tc1',label:'Projected gross receipts &le; $50,000/year for next 3 years'},{id:'tc2',label:'Total assets &lt; $250,000 at time of filing'},{id:'tc3',label:'Organization is NOT a church, school, or hospital'},{id:'tc4',label:'Organization is NOT a supporting organization (509(a)(3))'},{id:'tc5',label:'Organization is NOT a foreign organization'},{id:'tc6',label:'Organization is NOT a successor to a for-profit entity'},{id:'tc7',label:'Organization has NOT had tax-exempt status previously revoked'},{id:'tc8',label:'Organization is NOT a Limited Liability Company (LLC)'},{id:'tc9',label:'Organization will NOT engage in credit counseling services'},{id:'tc10',label:'Organization will NOT engage in healthcare activities (HMO, hospital, etc.)'}];
+
+function initTracker(){var tb=document.getElementById('tracker-tbody');tb.innerHTML='';TC.forEach(function(c){var r=document.createElement('tr');r.style.borderBottom='1px solid var(--border)';r.innerHTML='<td style="padding:10px 16px;font-size:13px;color:var(--navy)">'+c.label+'</td><td style="padding:10px 16px;text-align:center"><select id="'+c.id+'-answer" onchange="updateVerdict()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border-dark);border-radius:6px;background:white;color:var(--navy);cursor:pointer"><option value="">—</option><option value="yes">Yes ✓</option><option value="no">No ✗</option></select></td><td style="padding:10px 16px;text-align:center"><span id="'+c.id+'-status" class="tracker-check unknown">?</span></td>';tb.appendChild(r);});}
+
+function updateVerdict(){var allAns=true,allEZ=true;TC.forEach(function(c){var v=document.getElementById(c.id+'-answer').value,s=document.getElementById(c.id+'-status');if(!v){allAns=false;s.className='tracker-check unknown';s.textContent='?';return;}if(v==='yes'){s.className='tracker-check yes';s.textContent='✓';}else{s.className='tracker-check no';s.textContent='✗';allEZ=false;}});var vb=document.getElementById('verdict-box');if(!allAns){vb.innerHTML='<div class="info-box info"><span class="icon">⏳</span><p>Answer all criteria above to receive your filing verdict.</p></div>';return;}if(allEZ){vb.innerHTML='<div class="verdict-banner ez"><div class="verdict-icon">✅</div><div><div class="verdict-title" style="color:var(--success)">You Qualify for Form 1023-EZ</div><div class="verdict-desc">Your organization meets all eligibility criteria. File online at pay.gov. Processing typically takes 2-4 weeks.</div></div></div>';}else{vb.innerHTML='<div class="verdict-banner full"><div class="verdict-icon">⚠️</div><div><div class="verdict-title" style="color:var(--warning)">Full Form 1023 Required</div><div class="verdict-desc">One or more criteria disqualify your organization from Form 1023-EZ. Processing takes 3-12 months. Ikshana Z Inc can assist.</div><div style="margin-top:8px"><button class="btn-cpa" id="cpa-full-1023" onclick="addToCartAndMark(\'Full Form 1023 Preparation\',\'Organization does not qualify for 1023-EZ. Ikshana Z Inc will prepare the complete Form 1023 package.\',\'cpa-full-1023\')">+ Add Full 1023 to CPA Cart</button></div></div></div>';}}
+
+function goToStep(n){document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('active');});document.getElementById('step-'+n).classList.add('active');document.querySelectorAll('.step-nav li').forEach(function(li,i){li.classList.toggle('active',i===n);});currentStep=n;updateProgress();updateDot(n);onStepActivate(n);window.scrollTo({top:0,behavior:'smooth'});}
+function nextStep(){if(currentStep<8)goToStep(currentStep+1);}
+function prevStep(){if(currentStep>0)goToStep(currentStep-1);}
+function updateProgress(){var pct=Math.round(((currentStep+1)/9)*100);document.getElementById('progress-fill').style.width=pct+'%';var labels=['State Selection','Name Availability','Corporation Type','State Requirements','Members & Directors','Mission Statement','EIN Application','AG Office Filing','1023 / 1023-EZ Tracker'];document.getElementById('progress-label').textContent='Step '+(currentStep+1)+' of 9 — '+labels[currentStep];}
+function updateDot(a){for(var i=0;i<9;i++){var d=document.getElementById('dot-'+i);if(i<a){d.className='step-dot done';d.textContent='✓';}else if(i===a){d.className='step-dot active';d.textContent=i+1;}else{d.className='step-dot pending';d.textContent=i+1;}}}
+function onStepActivate(n){if(n===3)renderStateReq();if(n===5)renderMissionNotes();if(n===6)renderEINSummary();if(n===7)renderAGInfo();if(n===8)initTracker();}
+
+function onStateChange(){selectedState=document.getElementById('state-select').value;if(!selectedState){document.getElementById('state-info-panel').style.display='none';return;}var d=SD[selectedState];document.getElementById('state-info-panel').style.display='block';document.getElementById('state-info-content').innerHTML='<div class="info-box '+(selectedState==='NY'?'warning':'info')+'"><span class="icon">'+(selectedState==='NY'?'⚠️':'ℹ️')+'</span><p>'+d.notes+'</p></div>';document.getElementById('state-info-grid').innerHTML='<div class="state-info-card"><div class="state-info-label">Min. Directors</div><div class="state-info-value">'+d.minDirectors+'</div></div><div class="state-info-card"><div class="state-info-label">Processing Time</div><div class="state-info-value">'+d.processingTime+'</div></div><div class="state-info-card"><div class="state-info-label">Annual Report</div><div class="state-info-value">'+d.annualReport+'</div></div><div class="state-info-card"><div class="state-info-label">Registered Agent</div><div class="state-info-value">'+d.registeredAgent+'</div></div>';document.getElementById('sos-link').innerHTML='Visit <a href="'+d.sosUrl+'" target="_blank" style="color:var(--info)">'+d.filingPortal+'</a> for official check.';document.getElementById('ny-publication-note').style.display=selectedState==='NY'?'block':'none';}
+
+function renderStateReq(){var c=document.getElementById('state-req-content');if(!selectedState){c.innerHTML='<div class="info-box info"><span class="icon">ℹ️</span><p>Please complete Step 1 first.</p></div>';return;}var d=SD[selectedState];var html='<div class="info-box info"><span class="icon">🏛️</span><p>Requirements for <strong>'+d.name+'</strong>. Portal: <a href="'+d.sosUrl+'" target="_blank" style="color:var(--info)">'+d.filingPortal+'</a></p></div><ul class="checklist">';d.requirements.forEach(function(r){html+='<li><input type="checkbox"><div class="check-text"><div class="check-label">'+r+'</div></div></li>';});html+='</ul>';if(selectedState==='NY')html+='<div class="info-box warning" style="margin-top:12px"><span class="icon">📰</span><p><strong>Publication Requirement:</strong> New York requires publication in two designated newspapers for 6 consecutive weeks within 120 days of formation.</p></div>';html+='<div class="section-divider">Registered Agent</div><div class="info-box info"><span class="icon">📬</span><p>A registered agent with a physical address in '+d.name+' is required.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px"><button class="btn-cpa" id="cpa-ra-state" onclick="addToCartAndMark(\'Registered Agent Service — '+d.name+'\',\'Ikshana Z Inc will arrange a compliant registered agent in '+d.name+'.\',\'cpa-ra-state\')">+ Registered Agent to CPA Cart</button><button class="btn-cpa" id="cpa-compliance-state" onclick="addToCartAndMark(\'Full State Compliance Review — '+d.name+'\',\'Ikshana Z Inc will audit all '+d.name+' state requirements.\',\'cpa-compliance-state\')">+ Full Compliance Review</button></div>';c.innerHTML=html;}
+
+function renderMissionNotes(){var c=document.getElementById('mission-state-notes');if(!selectedState){c.innerHTML='<div class="info-box info"><span class="icon">ℹ️</span><p>Complete Step 1 to see state-specific requirements.</p></div>';return;}c.innerHTML='<div class="info-box warning"><span class="icon">⚖️</span><p>'+SD[selectedState].missionNote+'</p></div>';}
+
+function checkMission(){var v=document.getElementById('mission-text').value.trim(),fb=document.getElementById('mission-feedback');if(!v){fb.innerHTML='';return;}var issues=[];if(!/501\(c\)\(3\)|section 501|internal revenue/i.test(v))issues.push('Consider adding a reference to IRC 501(c)(3)');if(!/educational|charitable|religious|scientific|literary|public|community/i.test(v))issues.push('Include specific exempt purpose words: charitable, educational, religious, scientific, or literary');if(!/dissolv|dissolution/i.test(v))issues.push('A dissolution clause is recommended in the mission/articles');if(!issues.length)fb.innerHTML='<div class="info-box success"><span class="icon">✅</span><p>Mission statement looks good! Final review by Ikshana Z Inc is recommended.</p></div>';else fb.innerHTML='<div class="info-box warning"><span class="icon">⚠️</span><ul style="padding-left:16px">'+issues.map(function(i){return'<li>'+i+'</li>';}).join('')+'</ul></div>';}
+
+var TAKEN=['united way','red cross','habitat for humanity','salvation army','goodwill','ymca','ywca'];
+function checkName(n){var inp=document.getElementById('name-'+n),s=document.getElementById('name-'+n+'-status'),v=inp.value.trim();if(!v){s.innerHTML='';return;}s.innerHTML='<span class="name-status checking">⏳ Checking...</span>';setTimeout(function(){var taken=TAKEN.some(function(t){return v.toLowerCase().indexOf(t)>=0;});if(taken)s.innerHTML='<span class="name-status unavailable">✗ Name likely unavailable</span>';else if(v.length<6)s.innerHTML='<span class="name-status unavailable">✗ Name too short</span>';else s.innerHTML='<span class="name-status available">✓ Potentially available — verify via official SOS portal</span>';},900);}
+
+function selectCorpType(el,type){document.querySelectorAll('.corp-type-card').forEach(function(c){c.classList.remove('selected');});el.classList.add('selected');selectedCorpType=type;var note=document.getElementById('corp-type-cpa-note');if(type==='unsure'){note.style.display='block';addToCart('Tax-Exempt Classification Consultation','CPA will evaluate mission and activities to recommend optimal 501(c) category.');}else note.style.display='none';}
+
+function addMember(){var name=document.getElementById('m-name').value.trim(),role=document.getElementById('m-role').value,us=document.getElementById('m-us').value,taxid=document.getElementById('m-taxid').value;if(!name){alert('Please enter the member\'s full name.');return;}members.push({name:name,role:role,us:us,taxid:taxid});renderMembersTable();document.getElementById('m-name').value='';updateEINResponsible();}
+function removeMember(i){members.splice(i,1);renderMembersTable();updateEINResponsible();}
+function renderMembersTable(){var tb=document.getElementById('members-tbody');if(!members.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--slate-light);padding:20px;font-size:13px">No members added yet.</td></tr>';document.getElementById('member-flags').innerHTML='';return;}var rows='',flags=[];members.forEach(function(m,i){var ub=m.us==='yes'?'<span class="badge badge-us">US</span>':'<span class="badge badge-foreign">Foreign</span>';var tb2=m.taxid==='ssn'?'<span class="badge badge-ssn">SSN</span>':m.taxid==='itin'?'<span class="badge badge-itin">ITIN</span>':m.taxid==='none'?'<span class="badge badge-none">No ID</span>':'<span class="badge" style="background:var(--border);color:var(--slate)">Pending</span>';if(m.us==='no')flags.push(m.name+' is a foreign national — ITIN may be required');if(m.taxid==='none')flags.push(m.name+' has no US tax ID — ITIN application (Form W-7) needed');rows+='<tr><td style="font-weight:500">'+m.name+'</td><td>'+m.role+'</td><td>'+ub+'</td><td>'+tb2+'</td><td><button onclick="removeMember('+i+')" style="background:none;border:none;color:var(--slate-light);cursor:pointer;font-size:16px">&#215;</button></td></tr>';});document.getElementById('members-tbody').innerHTML=rows;var fd=document.getElementById('member-flags');if(flags.length){fd.innerHTML='<div class="info-box warning"><span class="icon">⚠️</span><ul style="padding-left:16px">'+flags.map(function(f){return'<li style="font-size:12px">'+f+'</li>';}).join('')+'</ul></div>';addToCart('ITIN Application Assistance','One or more members require ITIN (W-7) for EIN application eligibility.');}else fd.innerHTML='';}
+function updateEINResponsible(){var sel=document.getElementById('ein-responsible');sel.innerHTML='<option value="">— Select from members above —</option>';members.forEach(function(m){var o=document.createElement('option');o.value=m.name;o.textContent=m.name+' ('+m.role+') — '+m.taxid.toUpperCase();sel.appendChild(o);});sel.onchange=function(){renderResponsibleNote();};}
+function renderResponsibleNote(){var v=document.getElementById('ein-responsible').value,note=document.getElementById('responsible-party-note');if(!v){note.innerHTML='';return;}var m=members.find(function(x){return x.name===v;});if(!m)return;if(m.taxid==='none')note.innerHTML='<div class="info-box danger"><span class="icon">🚫</span><p><strong>'+m.name+'</strong> has no US tax ID and cannot serve as responsible party without first obtaining an ITIN.</p></div>';else if(m.taxid==='itin')note.innerHTML='<div class="info-box warning"><span class="icon">⚠️</span><p><strong>'+m.name+'</strong> has an ITIN. Can apply for EIN by fax or mail (not online per recent IRS policy).</p></div>';else note.innerHTML='<div class="info-box success"><span class="icon">✅</span><p><strong>'+m.name+'</strong> has an SSN and can serve as responsible party. Online EIN application available.</p></div>';}
+function renderEINSummary(){var c=document.getElementById('ein-party-summary');if(!members.length){c.innerHTML='<div class="info-box info"><span class="icon">ℹ️</span><p>Add members in Step 5 to see EIN eligibility.</p></div>';return;}var hS=members.some(function(m){return m.taxid==='ssn';}),hI=members.some(function(m){return m.taxid==='itin';});if(hS)c.innerHTML='<div class="info-box success"><span class="icon">✅</span><p>At least one member has an SSN — online EIN application is available.</p></div>';else if(hI)c.innerHTML='<div class="info-box warning"><span class="icon">⚠️</span><p>No member has an SSN. ITIN holders can apply via fax or mail. CPA-assisted method recommended.</p></div>';else c.innerHTML='<div class="info-box danger"><span class="icon">🚫</span><p>No member has an SSN or ITIN. EIN application cannot proceed. Ikshana Z Inc can assist with the W-7 application.</p></div>';}
+function onEINMethodChange(){var v=document.querySelector('input[name="ein-method"]:checked').value;if(v==='cpa')addToCartAndMark('EIN Application (IRS SS-4 Filing)','Ikshana Z Inc will prepare and submit Form SS-4 on behalf of the organization.','ein-method-cpa');}
+function renderAGInfo(){var c=document.getElementById('ag-state-header');if(!selectedState){c.innerHTML='<div class="info-box info"><span class="icon">🏛️</span><p>Complete Step 1 to see state-specific filing portal and timeline.</p></div>';return;}var d=SD[selectedState];c.innerHTML='<div class="info-box success"><span class="icon">🏛️</span><p>Filing in <strong>'+d.name+'</strong>. Portal: <a href="'+d.sosUrl+'" target="_blank" style="color:var(--info);font-weight:500">'+d.filingPortal+' &rarr;</a> | Processing: '+d.processingTime+'</p></div>';document.getElementById('ag-processing-note').textContent='Processing time: '+d.processingTime;}
+
+function addToCart(title,note){if(cartItems.find(function(i){return i.title===title;}))return;cartItems.push({title:title,note:note,id:Date.now()});renderCart();}
+function addToCartAndMark(title,note,btnId){if(!cartItems.find(function(i){return i.title===title;})){cartItems.push({title:title,note:note,id:Date.now()});renderCart();}if(btnId){var btn=document.getElementById(btnId);if(btn){btn.classList.add('in-cart');btn.textContent='✓ Added';btn.onclick=null;}}}
+function removeFromCart(id){cartItems=cartItems.filter(function(i){return i.id!==id;});renderCart();}
+function renderCart(){var body=document.getElementById('cpa-cart-body'),badge=document.getElementById('cart-count');badge.textContent=cartItems.length;if(!cartItems.length){body.innerHTML='<div class="cpa-empty"><div class="cpa-empty-icon">📋</div><p style="font-size:13px;font-weight:500">No services added yet</p></div>';return;}body.innerHTML=cartItems.map(function(item){return'<div class="cpa-item"><button class="cpa-item-remove" onclick="removeFromCart('+item.id+')">&#215;</button><div class="cpa-item-title">💼 '+item.title+'</div><div class="cpa-item-note">'+item.note+'</div></div>';}).join('');}
+function toggleCPAPanel(){document.getElementById('cpa-overlay').classList.toggle('open');}
+function handleOverlayClick(e){if(e.target===document.getElementById('cpa-overlay'))toggleCPAPanel();}
+function openEmailModal(){if(selectedState&&SD[selectedState])document.getElementById('email-state-display').value=SD[selectedState].name;document.getElementById('pdf-download-status').textContent='';document.getElementById('email-modal').classList.add('open');document.getElementById('cpa-overlay').classList.remove('open');}
+function closeEmailModal(){document.getElementById('email-modal').classList.remove('open');}
+
+function downloadSummaryPDF(){
+  var client=document.getElementById('email-client-name').value.trim();
+  var clientEmail=document.getElementById('email-client-email').value.trim();
+  if(!client||!clientEmail){alert('Please enter the client name and email first.');return;}
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({unit:'pt',format:'letter'});
+  var W=doc.internal.pageSize.getWidth();
+  var H=doc.internal.pageSize.getHeight();
+  var M=44; // margin
+  var y=0;
+  var CW=W-M*2; // content width
+
+  // ── COLOR HELPERS ──
+  function navy(){ doc.setFillColor(15,30,53); }
+  function navyT(){ doc.setTextColor(15,30,53); }
+  function navyD(){ doc.setDrawColor(15,30,53); }
+  function gold(){ doc.setFillColor(201,151,43); }
+  function goldT(){ doc.setTextColor(201,151,43); }
+  function goldD(){ doc.setDrawColor(201,151,43); }
+  function slate(){ doc.setFillColor(100,116,139); }
+  function slateT(){ doc.setTextColor(100,116,139); }
+  function cream(){ doc.setFillColor(250,248,244); }
+  function white(){ doc.setFillColor(255,255,255); }
+  function whiteT(){ doc.setTextColor(255,255,255); }
+  function ltgray(){ doc.setDrawColor(226,221,212); }
+  function successF(){ doc.setFillColor(240,253,244); }
+  function successT(){ doc.setTextColor(22,163,74); }
+  function successD(){ doc.setDrawColor(22,163,74); }
+  function warnF(){ doc.setFillColor(255,251,235); }
+  function warnT(){ doc.setTextColor(217,119,6); }
+  function warnD(){ doc.setDrawColor(217,119,6); }
+  function dangerF(){ doc.setFillColor(254,242,242); }
+  function dangerT(){ doc.setTextColor(220,38,38); }
+  function infoF(){ doc.setFillColor(240,249,255); }
+  function infoT(){ doc.setTextColor(3,105,161); }
+  function row2F(i){ if(i%2===0)doc.setFillColor(250,248,244); else doc.setFillColor(245,244,241); }
+
+  // ── PAGE HELPERS ──
+  function footer(){
+    navy(); doc.rect(0,H-28,W,28,'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(148,163,184);
+    doc.text('Ikshana Z Inc  |  office@ikshanaz.com  |  418 Broadway Ste R, Albany NY  |  www.ikshanaz.com',W/2,H-10,{align:'center'});
+  }
+  function chk(need){ if(y+need>H-40){ footer(); doc.addPage(); y=M; } }
+
+  // ── SECTION HEADER ──
+  function sec(title){
+    chk(40); y+=6;
+    navy(); doc.rect(M,y,CW,22,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); whiteT();
+    doc.text(title.toUpperCase(),M+10,y+15);
+    y+=30;
+  }
+
+  // ── FIELD ROW ──
+  function fld(label,value,alt){
+    chk(22);
+    if(alt) doc.setFillColor(245,244,241); else cream();
+    doc.rect(M,y,CW,20,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); slateT();
+    doc.text(label,M+8,y+14);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); navyT();
+    var lines=doc.splitTextToSize(value||'-',CW-155);
+    doc.text(lines,M+150,y+14);
+    ltgray(); doc.setLineWidth(0.3); doc.line(M,y+20,W-M,y+20);
+    y+=20;
+  }
+
+  // ── NOTE BOX ──
+  function note(text,type){
+    chk(35);
+    if(type==='ok'){ successF(); successD(); }
+    else if(type==='warn'){ warnF(); warnD(); }
+    else if(type==='danger'){ dangerF(); doc.setDrawColor(220,38,38); }
+    else { infoF(); doc.setDrawColor(3,105,161); }
+    doc.rect(M,y,CW,28,'F');
+    doc.setLineWidth(2); doc.line(M,y,M,y+28); doc.setLineWidth(0.3);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8.5);
+    if(type==='ok') successT(); else if(type==='warn') warnT(); else if(type==='danger') dangerT(); else infoT();
+    var lines=doc.splitTextToSize(text,CW-18);
+    var bh=Math.max(28,lines.length*11+10);
+    if(bh>28){
+      if(type==='ok'){ successF(); successD(); } else if(type==='warn'){ warnF(); warnD(); }
+      else if(type==='danger'){ dangerF(); doc.setDrawColor(220,38,38); } else { infoF(); doc.setDrawColor(3,105,161); }
+      doc.rect(M,y,CW,bh,'F'); doc.setLineWidth(2); doc.line(M,y,M,y+bh); doc.setLineWidth(0.3);
+    }
+    doc.text(lines,M+10,y+11);
+    y+=bh+4;
+  }
+
+  // ── COVER ──
+  navy(); doc.rect(0,0,W,105,'F');
+  gold(); doc.rect(0,105,W,5,'F');
+  gold(); doc.roundedRect(M,22,48,48,5,5,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); navyT();
+  doc.text('IZ',M+24,54,{align:'center'});
+  doc.setFontSize(20); whiteT(); doc.text('Ikshana Z Inc',M+60,42);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(148,163,184);
+  doc.text('CERTIFIED PUBLIC ACCOUNTANTS  -  TAX  -  ADVISORY  -  COMPLIANCE',M+60,58);
+  doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),W-M,42,{align:'right'});
+  y=130;
+
+  // Title block
+  cream(); doc.rect(M,y,CW,60,'F');
+  gold(); doc.setLineWidth(3); doc.line(M,y,M,y+60); doc.setLineWidth(0.5);
+  ltgray(); doc.rect(M,y,CW,60,'S');
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); navyT();
+  doc.text('Nonprofit Incorporation - Full Intake Report',M+16,y+25);
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); slateT();
+  doc.text(client,M+16,y+45);
+  var sname=selectedState&&SD[selectedState]?SD[selectedState].name:'';
+  if(sname) doc.text(sname+' Incorporation',W-M-8,y+45,{align:'right'});
+  y+=76;
+
+  // ── SECTION 1: CLIENT DETAILS ──
+  sec('1. Client & Organization Details');
+  fld('Client / Org Name',client);
+  fld('Client Email',clientEmail,true);
+  var notes2=document.getElementById('email-notes').value.trim();
+  if(notes2) fld('Additional Notes',notes2);
+  y+=6;
+
+  // ── SECTION 2: STATE ──
+  sec('2. State of Incorporation');
+  if(selectedState&&SD[selectedState]){
+    var d=SD[selectedState];
+    fld('Selected State',d.name);
+    fld('Filing Office',d.filingOffice||d.name+' Secretary of State',true);
+    fld('Required Form',d.incorporationForm||d.name+' Articles of Incorporation');
+    fld('Processing Timeline',d.processingTime,true);
+    fld('Minimum Directors',''+d.minDirectors);
+    fld('Registered Agent',d.registeredAgent,true);
+    fld('Annual Report Req.',d.annualReport);
+    var opEl=document.getElementById('operate-state');
+    var opv=opEl?opEl.value:'';
+    fld('Where Org Operates',opv===''?'Same as incorporation state':opv==='multi'?'Multiple States':'Nationwide',true);
+    y+=4;
+    if(d.notes) note(d.notes,selectedState==='NY'?'warn':'info');
+    if(d.requirements&&d.requirements.length){
+      y+=6; doc.setFont('helvetica','bold'); doc.setFontSize(8.5); goldT();
+      doc.text('STATE FILING REQUIREMENTS',M,y); y+=12;
+      d.requirements.forEach(function(r,i){
+        chk(18); row2F(i); doc.rect(M,y,CW,18,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); navyT();
+        doc.text('  > '+r,M+4,y+13);
+        ltgray(); doc.setLineWidth(0.3); doc.line(M,y+18,W-M,y+18);
+        y+=18;
+      });
+    }
+  } else {
+    note('State not selected - please complete Step 1.','warn');
+  }
+  y+=6;
+
+  // ── SECTION 3: CORP TYPE ──
+  sec('3. Corporation Type');
+  var ctMap={'501c3':'501(c)(3) - Charitable / Educational / Religious / Scientific','501c4':'501(c)(4) - Social Welfare Organization','501c6':'501(c)(6) - Trade Association / Chamber of Commerce','unsure':'Not Determined - CPA Consultation Required'};
+  var ctDesc={'501c3':'Donors may deduct contributions. Organization must operate exclusively for exempt purposes. Subject to IRS Form 1023/1023-EZ application process.','501c4':'Political activity is permitted. Donations are NOT tax-deductible. Less IRS scrutiny than 501(c)(3).','501c6':'Membership-based organization serving common business interests. Does not require Form 1023.','unsure':'Ikshana Z Inc will evaluate mission, funding sources, and activities to determine optimal category.'};
+  fld('Selected Type',ctMap[selectedCorpType]||'Not selected');
+  if(selectedCorpType&&ctDesc[selectedCorpType]){
+    y+=4; note(ctDesc[selectedCorpType],selectedCorpType==='unsure'?'warn':'info');
+  }
+  y+=6;
+
+  // ── SECTION 4: MEMBERS ──
+  sec('4. Members & Directors');
+  if(members.length){
+    // Table header
+    chk(22);
+    doc.setFillColor(36,61,94); doc.rect(M,y,CW,20,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); whiteT();
+    doc.text('Name',M+6,y+14);
+    doc.text('Role',M+150,y+14);
+    doc.text('US Resident',M+230,y+14);
+    doc.text('Tax ID',M+320,y+14);
+    doc.text('Flags',M+380,y+14);
+    y+=20;
+    members.forEach(function(m,i){
+      var flags=[];
+      if(m.us==='no') flags.push('Foreign national');
+      if(m.taxid==='none') flags.push('No US tax ID');
+      if(m.taxid==='pending') flags.push('Tax ID pending');
+      var rh=flags.length>0?26:20;
+      chk(rh+2);
+      row2F(i); doc.rect(M,y,CW,rh,'F');
+      // left accent
+      if(m.taxid==='none'){ doc.setFillColor(220,38,38); }
+      else if(m.us==='no'){ doc.setFillColor(190,24,93); }
+      else { gold(); }
+      doc.rect(M,y,3,rh,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); navyT();
+      doc.text(m.name,M+8,y+14);
+      doc.setFont('helvetica','normal'); slateT();
+      doc.text(m.role,M+150,y+14);
+      if(m.us==='yes'){ doc.setTextColor(29,78,216); doc.text('Yes - US',M+230,y+14); }
+      else { doc.setTextColor(190,24,93); doc.text('No - Foreign',M+230,y+14); }
+      if(m.taxid==='ssn'){ successT(); }
+      else if(m.taxid==='itin'){ warnT(); }
+      else if(m.taxid==='none'){ dangerT(); }
+      else { slateT(); }
+      doc.text(m.taxid.toUpperCase(),M+320,y+14);
+      if(flags.length){ dangerT(); doc.setFontSize(7.5); doc.text(flags.join(', '),M+380,y+14); }
+      ltgray(); doc.setLineWidth(0.3); doc.line(M,y+rh,W-M,y+rh);
+      y+=rh;
+    });
+    y+=6;
+    // EIN responsible party
+    var rpVal=document.getElementById('ein-responsible').value;
+    if(rpVal){
+      var rpm=members.find(function(x){return x.name===rpVal;});
+      if(rpm){
+        doc.setFont('helvetica','bold'); doc.setFontSize(8.5); goldT();
+        doc.text('EIN RESPONSIBLE PARTY',M,y); y+=12;
+        fld('Name',rpm.name);
+        fld('Tax ID',rpm.taxid.toUpperCase(),true);
+        var einMethodEl=document.querySelector('input[name="ein-method"]:checked');
+        var einMethodLabels={'online':'Online via IRS.gov (Instant)','fax':'By Fax - Form SS-4 (4 Business Days)','mail':'By Mail - Form SS-4 (4-5 Weeks)','cpa':'CPA Assisted - Ikshana Z Inc Handles'};
+        fld('EIN Method',einMethodEl?einMethodLabels[einMethodEl.value]||einMethodEl.value:'Not selected');
+        var einV=document.getElementById('ein-value').value.trim();
+        if(einV) fld('EIN Received',einV,true);
+      }
+    }
+    var hasForeign=members.some(function(m){return m.us==='no';});
+    var hasNoID=members.some(function(m){return m.taxid==='none';});
+    if(hasForeign){ y+=4; note('One or more directors are foreign nationals. ITIN (Form W-7) may be required for the EIN application. Ikshana Z Inc will advise on state restrictions.','warn'); }
+    if(hasNoID){ y+=4; note('One or more members have no US tax ID. EIN application cannot proceed until an SSN or ITIN is obtained.','danger'); }
+  } else {
+    note('No members or directors added in this session.','warn');
+  }
+  y+=6;
+
+  // ── SECTION 5: MISSION ──
+  sec('5. Mission Statement');
+  var missionText=document.getElementById('mission-text').value.trim();
+  if(missionText){
+    chk(50);
+    var mLines=doc.splitTextToSize(missionText,CW-24);
+    var mH=Math.max(50,mLines.length*12+20);
+    chk(mH+10);
+    cream(); doc.rect(M,y,CW,mH,'F');
+    gold(); doc.setLineWidth(2); doc.line(M,y,M,y+mH); doc.setLineWidth(0.3);
+    ltgray(); doc.rect(M,y,CW,mH,'S');
+    doc.setFont('helvetica','italic'); doc.setFontSize(9); navyT();
+    doc.text(mLines,M+12,y+16);
+    y+=mH+10;
+    // Compliance
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); goldT();
+    doc.text('COMPLIANCE CHECK',M,y); y+=12;
+    var hasIRS=/501.c..3.|section 501|internal revenue/i.test(missionText);
+    var hasPurpose=/educational|charitable|religious|scientific|literary/i.test(missionText);
+    var hasDissol=/dissolv|dissolution/i.test(missionText);
+    fld('IRC 501(c)(3) Reference',hasIRS?'Present - Compliant':'MISSING - Add IRC Section 501(c)(3) reference');
+    fld('Exempt Purpose Language',hasPurpose?'Present - Compliant':'MISSING - Add charitable/educational/religious/scientific language',true);
+    fld('Dissolution Clause',hasDissol?'Present - Compliant':'RECOMMENDED - Add clause distributing assets to another 501(c)(3)');
+    if(selectedState&&SD[selectedState]&&SD[selectedState].missionNote){
+      y+=4; note('State Note ('+SD[selectedState].name+'): '+SD[selectedState].missionNote,'warn');
+    }
+  } else {
+    note('No mission statement entered. Ikshana Z Inc CPA will draft a compliant statement.','warn');
+  }
+  y+=6;
+
+  // ── SECTION 6: AG CHECKLIST ──
+  sec('6. Articles of Incorporation Checklist');
+  var agItems=[
+    {id:'ag-c1',label:'Corporate name (with required designator)'},
+    {id:'ag-c2',label:'Registered agent name and address'},
+    {id:'ag-c3',label:'Names and addresses of initial directors'},
+    {id:'ag-c4',label:'Statement of purpose / mission (IRS-compliant)'},
+    {id:'ag-c5',label:'Dissolution clause included'},
+    {id:'ag-c6',label:'Filing submitted to Secretary of State'},
+    {id:'ag-c7',label:'Certificate of Incorporation received'}
+  ];
+  agItems.forEach(function(c,i){
+    var el=document.getElementById(c.id);
+    var checked=el&&el.checked;
+    chk(20); row2F(i); doc.rect(M,y,CW,20,'F');
+    doc.setDrawColor(checked?22:180,checked?163:180,checked?74:180);
+    doc.setLineWidth(0.8); doc.rect(M+8,y+5,10,10,'S');
+    if(checked){ doc.setFont('helvetica','bold'); doc.setFontSize(8); successT(); doc.text('/',M+9,y+14); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    if(checked) successT(); else navyT();
+    doc.text(c.label,M+26,y+14);
+    doc.setFont('helvetica','italic'); doc.setFontSize(7.5);
+    if(checked){ successT(); doc.text('Completed',W-M-6,y+14,{align:'right'}); }
+    else { slateT(); doc.text('Pending',W-M-6,y+14,{align:'right'}); }
+    ltgray(); doc.setLineWidth(0.3); doc.line(M,y+20,W-M,y+20);
+    y+=20;
+  });
+  if(selectedState==='NY'){
+    y+=6; note('NY PUBLICATION REQUIREMENT: Must publish for 6 consecutive weeks in two designated newspapers within 120 days of formation. Failure results in suspended corporate powers. Ikshana Z Inc can coordinate.','warn');
+  }
+  y+=6;
+
+  // ── SECTION 7: EIN CHECKLIST ──
+  sec('7. EIN Application Checklist');
+  var einItems=[
+    {id:'ein-c1',label:'Organization articles drafted or in progress'},
+    {id:'ein-c2',label:'Responsible party identified with valid SSN or ITIN'},
+    {id:'ein-c3',label:'Form SS-4 completed / IRS online application submitted'},
+    {id:'ein-c4',label:'EIN received and documented (CP 575 letter)'}
+  ];
+  einItems.forEach(function(c,i){
+    var el=document.getElementById(c.id);
+    var checked=el&&el.checked;
+    chk(20); row2F(i); doc.rect(M,y,CW,20,'F');
+    doc.setDrawColor(checked?22:180,checked?163:180,checked?74:180);
+    doc.setLineWidth(0.8); doc.rect(M+8,y+5,10,10,'S');
+    if(checked){ doc.setFont('helvetica','bold'); doc.setFontSize(8); successT(); doc.text('/',M+9,y+14); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    if(checked) successT(); else navyT();
+    doc.text(c.label,M+26,y+14);
+    doc.setFont('helvetica','italic'); doc.setFontSize(7.5);
+    if(checked){ successT(); doc.text('Completed',W-M-6,y+14,{align:'right'}); }
+    else { slateT(); doc.text('Pending',W-M-6,y+14,{align:'right'}); }
+    ltgray(); doc.setLineWidth(0.3); doc.line(M,y+20,W-M,y+20);
+    y+=20;
+  });
+  var einV2=document.getElementById('ein-value').value.trim();
+  if(einV2){ y+=4; fld('EIN (Received)',einV2); }
+  y+=6;
+
+  // ── SECTION 8: 1023 ELIGIBILITY ──
+  sec('8. IRS 501(c)(3) Filing - Form 1023 / 1023-EZ Eligibility');
+  var TCids=['tc1','tc2','tc3','tc4','tc5','tc6','tc7','tc8','tc9','tc10'];
+  var TCLabels=['Projected gross receipts 50,000 or less per year for next 3 years','Total assets less than 250,000 at time of filing','Organization is NOT a church, school, or hospital','Organization is NOT a supporting organization (509(a)(3))','Organization is NOT a foreign organization','Organization is NOT a successor to a for-profit entity','Organization has NOT had tax-exempt status previously revoked','Organization is NOT a Limited Liability Company (LLC)','Organization will NOT engage in credit counseling services','Organization will NOT engage in healthcare activities'];
+  var allAns2=true; var allEZ2=true;
+  // header
+  chk(22); doc.setFillColor(36,61,94); doc.rect(M,y,CW,20,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); whiteT();
+  doc.text('Criterion',M+6,y+14);
+  doc.text('Answer',M+CW-110,y+14);
+  doc.text('EZ Eligible?',M+CW-55,y+14);
+  y+=20;
+  TCids.forEach(function(id,i){
+    var el=document.getElementById(id+'-answer');
+    var v=el?el.value:'';
+    if(!v) allAns2=false;
+    else if(v==='no') allEZ2=false;
+    chk(22); row2F(i); doc.rect(M,y,CW,20,'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); navyT();
+    doc.text(TCLabels[i],M+6,y+14);
+    if(!v){ slateT(); doc.text('--',M+CW-110,y+14); slateT(); doc.text('?',M+CW-55,y+14); }
+    else if(v==='yes'){ successT(); doc.text('YES',M+CW-110,y+14); doc.text('Yes',M+CW-55,y+14); }
+    else { dangerT(); doc.text('NO',M+CW-110,y+14); doc.text('No',M+CW-55,y+14); }
+    ltgray(); doc.setLineWidth(0.3); doc.line(M,y+20,W-M,y+20);
+    y+=20;
+  });
+  y+=8;
+  if(allAns2){
+    chk(44);
+    if(allEZ2){
+      successF(); successD(); doc.setLineWidth(2); doc.rect(M,y,CW,40,'S');
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); successT();
+      doc.text('VERDICT: QUALIFIES FOR FORM 1023-EZ',M+12,y+18);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(15,70,30);
+      doc.text('Streamlined online application. Processing typically 2-4 weeks. File at pay.gov.',M+12,y+33);
+    } else {
+      warnF(); warnD(); doc.setLineWidth(2); doc.rect(M,y,CW,40,'S');
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); warnT();
+      doc.text('VERDICT: FULL FORM 1023 REQUIRED',M+12,y+18);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(92,50,5);
+      doc.text('Organization does not qualify for 1023-EZ. Processing: 3-12 months. Ikshana Z Inc will assist.',M+12,y+33);
+    }
+    y+=48;
+  } else {
+    note('Eligibility assessment incomplete. Not all criteria answered.','warn');
+  }
+  y+=6;
+
+  // ── SECTION 9: CPA SERVICES ──
+  sec('9. CPA Services Requested - Ikshana Z Inc');
+  if(cartItems.length){
+    cartItems.forEach(function(item,i){
+      chk(40);
+      row2F(i); doc.rect(M,y,CW,38,'F');
+      gold(); doc.rect(M,y,4,38,'F');
+      // number circle
+      navy(); doc.ellipse(M+14,y+19,8,8,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); whiteT();
+      doc.text(''+(i+1),M+14,y+22,{align:'center'});
+      doc.setFontSize(9); navyT(); doc.text(item.title,M+28,y+15);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); slateT();
+      var noteLines=doc.splitTextToSize(item.note,CW-36);
+      doc.text(noteLines,M+28,y+27);
+      ltgray(); doc.setLineWidth(0.3); doc.line(M,y+38,W-M,y+38);
+      y+=40;
+    });
+  } else {
+    note('No CPA services have been added to the cart in this session.','info');
+  }
+  y+=8;
+
+  // ── SECTION 10: NEXT STEPS ──
+  sec('10. Next Steps & Engagement');
+  note('Ikshana Z Inc will review this intake report and contact you within 2 business days to discuss scope of services, engagement terms, and proposed timeline.','info');
+  y+=8;
+  chk(65);
+  cream(); doc.rect(M,y,CW,60,'F');
+  ltgray(); doc.setLineWidth(0.5); doc.rect(M,y,CW,60,'S');
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); slateT();
+  doc.text('Client Signature: _______________________________',M+12,y+18);
+  doc.text('Date: ___________________',M+12,y+34);
+  doc.text('Print Name: _______________________________',M+12,y+50);
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); goldT();
+  doc.text('FOR CPA USE ONLY',W-M-8,y+18,{align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); slateT();
+  doc.text('Reviewer: Tanay Segu CPA, CMA',W-M-8,y+34,{align:'right'});
+  doc.text('Engagement #: ___________',W-M-8,y+50,{align:'right'});
+  y+=68;
+
+  // ── FOOTERS ON ALL PAGES ──
+  var total=doc.internal.getNumberOfPages();
+  for(var p=1;p<=total;p++){
+    doc.setPage(p);
+    footer();
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); slateT();
+    doc.text('Page '+p+' of '+total,W-M,H-36,{align:'right'});
+  }
+
+  var fname='Ikshana-Incorporation-'+client.replace(/[^a-zA-Z0-9]/g,'-')+'-'+new Date().toISOString().split('T')[0]+'.pdf';
+  doc.save(fname);
+  document.getElementById('pdf-download-status').textContent='PDF downloaded successfully';
+}
+
+function openEmailClient(){
+  var client=document.getElementById('email-client-name').value.trim();
+  var clientEmail=document.getElementById('email-client-email').value.trim();
+  if(!client||!clientEmail){alert('Please enter the client name and email first.');return;}
+  var cpaEmail=document.getElementById('email-cpa-email').value.trim();
+  var notes=document.getElementById('email-notes').value.trim();
+  var stateName=selectedState&&SD[selectedState]?SD[selectedState].name:'Not selected';
+  var ctMap={'501c3':'501(c)(3) Charitable Org','501c4':'501(c)(4) Social Welfare','501c6':'501(c)(6) Trade Association','unsure':'Not determined — CPA consultation needed'};
+  var subj='Nonprofit Incorporation Intake — '+client+' — '+stateName;
+  var body='Dear Tanay,\n\nPlease find attached the Nonprofit Incorporation Intake Report for the following client. All details entered in the tracker are included in the PDF.\n\n';
+  body+='═══════════════════════════════════════\n';
+  body+='CLIENT DETAILS\n';
+  body+='═══════════════════════════════════════\n';
+  body+='Organization : '+client+'\n';
+  body+='Client Email : '+clientEmail+'\n';
+  body+='State        : '+stateName+'\n';
+  body+='Corp Type    : '+(ctMap[selectedCorpType]||'Not selected')+'\n';
+  if(notes)body+='Notes        : '+notes+'\n';
+  body+='\n';
+  if(members.length){
+    body+='═══════════════════════════════════════\n';
+    body+='MEMBERS & DIRECTORS ('+members.length+')\n';
+    body+='═══════════════════════════════════════\n';
+    members.forEach(function(m,i){
+      body+=(i+1)+'. '+m.name+' — '+m.role+' | US Resident: '+(m.us==='yes'?'Yes':'No — Foreign National')+' | Tax ID: '+m.taxid.toUpperCase()+'\n';
+    });
+    body+='\n';
+  }
+  var missionText=document.getElementById('mission-text').value.trim();
+  if(missionText){
+    body+='═══════════════════════════════════════\n';
+    body+='MISSION STATEMENT\n';
+    body+='═══════════════════════════════════════\n';
+    body+=missionText+'\n\n';
+  }
+  var einVal=document.getElementById('ein-value').value.trim();
+  if(einVal){body+='EIN (Received): '+einVal+'\n\n';}
+  if(cartItems.length){
+    body+='═══════════════════════════════════════\n';
+    body+='CPA SERVICES REQUESTED ('+cartItems.length+')\n';
+    body+='═══════════════════════════════════════\n';
+    cartItems.forEach(function(item,i){body+=(i+1)+'. '+item.title+'\n   '+item.note+'\n';});
+    body+='\n';
+  }
+  body+='═══════════════════════════════════════\n';
+  body+='Please review the attached PDF for the full intake report including checklist status, compliance notes, and eligibility verdict.\n\n';
+  body+='Thank you,\n'+client+'\n'+clientEmail;
+  window.location.href='mailto:'+cpaEmail+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+}
+
+function exportPDF(){window.print();}
+
+initTracker();
+</script>
+</body>
+</html>
